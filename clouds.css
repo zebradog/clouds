@@ -1,0 +1,72 @@
+body{
+	background:#95b5ff;
+}
+
+/* fix for dat.gui with save and folders */
+.dg.a.has-save ul .folder ul {
+	margin-top: 0;
+}
+
+#viewport *{
+		box-sizing: border-box; 
+		margin: 0; 
+		padding: 0 
+	}
+
+	#viewport {
+		-webkit-perspective: 1000; 
+		-moz-perspective: 1000; 
+		-o-perspective: 1000; 
+		-ms-perspective: 1000;
+		position: absolute;
+		left: 0;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		overflow: hidden;
+	}
+
+	#world {
+		position: absolute;
+		left: 50%;
+		top: 50%;
+		margin-left: -256px;
+		margin-top: -256px;
+		height: 512px;
+		width: 512px;
+		-webkit-transform-style: preserve-3d;
+		-moz-transform-style: preserve-3d;
+		-o-transform-style: preserve-3d;
+		-ms-transform-style: preserve-3d;
+	}
+	
+	#world div {
+		-webkit-transform-style: preserve-3d;
+		-moz-transform-style: preserve-3d;	
+		-o-transform-style: preserve-3d;
+		-ms-transform-style: preserve-3d;		
+	}
+	
+	.cloudBase {
+		position: absolute;
+		left: 256px;
+		top: 256px;
+		width: 20px;
+		height: 20px;
+		margin-left: -10px;
+		margin-top: -10px;
+	}
+	
+	.cloudLayer {
+		position: absolute;
+		left: 50%;
+		top: 50%;
+		width: 256px;
+		height: 256px;
+		margin-left: -128px;
+		margin-top: -128px;
+		-webkit-transition: opacity .35s ease-out;
+		-moz-transition: opacity .35s ease-out;
+		-o-transition: opacity .35s ease-out;
+		-ms-transition: opacity .35s ease-out;
+	}
