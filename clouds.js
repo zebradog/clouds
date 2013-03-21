@@ -1,9 +1,11 @@
 var CAMERA_YAW = 0;
 var CAMERA_ROLL = 0;
 var CAMERA_ZOOM = 0;
-var CAMERA_X = 0;
-var CAMERA_Y = 0;
+var CAMERA_X = -150;
+var CAMERA_Y = -150;
 var SENSITIVITY = 0.1;
+var ZSPEED = 0.2;
+var OPACITY = .8;
 
 (function() {
 
@@ -51,8 +53,7 @@ var SENSITIVITY = 0.1;
 			};
 	}())
 
-	var layers = [],
-		objects = [],
+    var objects = [],
 		cloudGUI,
 		world = document.getElementById( 'world' ),
 		viewport = document.getElementById( 'viewport' ),
@@ -67,18 +68,21 @@ var SENSITIVITY = 0.1;
 	viewport.style.oPerspective = p;
 	
 	generate();
+    updateCamera();
 	
 	function createCloud() {
 	
 		var div = document.createElement( 'div'  );
 		div.className = 'cloudBase';
-		var x = 256 - ( Math.random() * 512 );
-		var y = 256 - ( Math.random() * 512 );
-		var z =  180 +  ( Math.random() * 20 );
+		var x = 128 - ( Math.random() * 256 );
+		var y = 128 - ( Math.random() * 256 );
+		var z =  80 +  ( Math.random() * 150 );
 		div.data = { 
 				x: x,
 				y: y,
-				z: z
+				z: z,
+                layers : [],
+                zSpeed : ZSPEED
 		};		
 		var t = 'translateX( ' + x + 'px ) translateY( ' + y + 'px ) translateZ( ' + z + 'px )';
 		div.style.webkitTransform = t;
@@ -86,14 +90,14 @@ var SENSITIVITY = 0.1;
 		div.style.oTransform = t;
 		
 		var cloudController = cloudGUI.addFolder("Cloud "+objects.length);
-		cloudController.add(div.data,"x",-512,512).onChange(function(value) {
+		cloudController.add(div.data,"x",-256,256).onChange(function(value) {
 		  updateCloud(div);
 		});
-		cloudController.add(div.data,"y",-512,512).onChange(function(value) {
+		cloudController.add(div.data,"y",-256,256).onChange(function(value) {
 		   updateCloud(div);
 		});
-		cloudController.add(div.data,"z",-512,512).onChange(function(value) {
-		   updateClouds(div);
+		cloudController.add(div.data,"z",80,450).onChange(function(value) {
+		   updateCloud(div);
 		});
 		
 		world.appendChild( div );
@@ -104,7 +108,7 @@ var SENSITIVITY = 0.1;
 			var r = Math.random();
 			var src = 'cloud.png';
 			( function( img ) { img.addEventListener( 'load', function() {
-				img.style.opacity = .8;
+				img.style.opacity = OPACITY;
 			} ) } )( cloud );
 			cloud.setAttribute( 'src', src );
 			cloud.className = 'cloudLayer';
@@ -121,6 +125,7 @@ var SENSITIVITY = 0.1;
 				z: z,
 				a: a,
 				s: s,
+                o : OPACITY,
 				speed: .1 * Math.random()
 			};
 			var t = 'translateX( ' + x + 'px ) translateY( ' + y + 'px ) translateZ( ' + z + 'px ) rotateZ( ' + a + 'deg ) scale( ' + s + ' )';
@@ -130,7 +135,7 @@ var SENSITIVITY = 0.1;
 			cloud.style.oTransform = t;
 			
 			div.appendChild( cloud );
-			layers.push( cloud );
+            div.data.layers.push(cloud);
 		}
 		return div;
 	}
@@ -170,23 +175,28 @@ var SENSITIVITY = 0.1;
 	}
 	
 	function update (){
-		
-		for( var j = 0; j < layers.length; j++ ) {
-			var layer = layers[ j ];
-			layer.data.a += layer.data.speed;
-			var t = 'translateX( ' + layer.data.x + 'px ) translateY( ' + layer.data.y + 'px ) translateZ( ' + layer.data.z + 'px ) rotateY( ' + ( - worldYAngle ) + 'deg ) rotateX( ' + ( - worldXAngle ) + 'deg ) rotateZ( ' + layer.data.a + 'deg ) scale( ' + layer.data.s + ')';
-			layer.style.webkitTransform = t;
-			layer.style.MozTransform = t;
-			layer.style.oTransform = t;
-		}
+        for (var i = 0; i < objects.length; i++ ){
+            var cloud = objects[i];
+            cloud.data.z += cloud.data.zSpeed;
+            updateCloud(cloud);
+            
+            for( var j = 0; j < cloud.data.layers.length; j++ ) {
+                var layer = cloud.data.layers[ j ];
+                var zPosition  = layer.data.z + cloud.data.z;
+                var oChange = (zPosition - 290) * .005;
+                    
+                layer.data.o =  oChange > 0 ? OPACITY - oChange  : layer.data.o;
+                
+                layer.data.a += layer.data.speed;
+                var t = 'translateX( ' + layer.data.x + 'px ) translateY( ' + layer.data.y + 'px ) translateZ( ' + layer.data.z + 'px ) rotateY( ' + ( - worldYAngle ) + 'deg ) rotateX( ' + ( - worldXAngle ) + 'deg ) rotateZ( ' + layer.data.a + 'deg ) scale( ' + layer.data.s + ')';
+                layer.style.opacity =  layer.data.o;
+                layer.style.webkitTransform = t;
+                layer.style.MozTransform = t;
+                layer.style.oTransform = t;
+            }
+        }
 		
 		requestAnimationFrame( update );
 	}
 
-	window.addEventListener( 'mousemove', function( e ) {
-		CAMERA_X = (e.clientX - window.innerWidth / 2) * SENSITIVITY;
-		CAMERA_Y = (e.clientY - window.innerHeight / 2) * SENSITIVITY;
-		updateCamera();
-	} );
-	
 	update();
